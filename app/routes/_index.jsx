@@ -1,7 +1,11 @@
 import { Link } from "@remix-run/react";
 
 import { useOptionalUser } from "~/utils";
-
+import { requireUserId } from "../session.server";
+export const loader = async ({ request }) => {
+  const user = await requireUserId(request);
+  return user;
+};
 export const meta = () => [{ title: "Remix Notes" }];
 
 export default function Index() {

@@ -11,10 +11,11 @@ import {
 } from "@remix-run/react";
 
 import { getUser } from "~/session.server";
-import stylesheet from "~/tailwind.css";
+import stylesheet from "~/styles/tailwind.css";
+import bootstrap from "bootstrap/dist/css/bootstrap.min.css";
 
 export const links = () => [
-  { rel: "stylesheet", href: stylesheet },
+  { rel: "stylesheet", href: bootstrap },
   ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
 ];
 
@@ -31,7 +32,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="h-full">
+      <body className="h-full" style={{ backgroundColor: "#f5f5f5" }}>
         <Outlet />
         <ScrollRestoration />
         <Scripts />

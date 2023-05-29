@@ -5,10 +5,15 @@ import { useEffect, useRef } from "react";
 import { verifyLogin } from "~/models/user.server";
 import { createUserSession, getUserId } from "~/session.server";
 import { safeRedirect, validateEmail } from "~/utils";
+import loginStyle from "~/styles/login.css";
+import logo from "public/logo.png";
 
+export function links() {
+  return [{ rel: "stylesheet", href: loginStyle }];
+}
 export const loader = async ({ request }) => {
   const userId = await getUserId(request);
-  if (userId) return redirect("/");
+  if (userId) return redirect("/admin/");
   return json({});
 };
 
@@ -61,12 +66,16 @@ export const meta = () => [{ title: "Login" }];
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/notes";
+  const redirectTo =
+    searchParams.get("redirectTo") === "/"
+      ? "/select-role"
+      : searchParams.get("redirectTo");
   const actionData = useActionData();
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
 
   useEffect(() => {
+    console.log(actionData?.errors);
     if (actionData?.errors?.email) {
       emailRef.current?.focus();
     } else if (actionData?.errors?.password) {
@@ -75,103 +84,85 @@ export default function LoginPage() {
   }, [actionData]);
 
   return (
-    <div className="flex min-h-full flex-col justify-center">
-      <div className="mx-auto w-full max-w-md px-8">
-        <Form method="post" className="space-y-6">
-          <div>
+    <div className="card form-signin w-100 m-auto px-5 d-flex flex-column align-items-stretch text-center">
+      <img
+        src={logo}
+        alt="logo"
+        style={{ width: 200, height: "auto" }}
+        className="height-auto m-auto"
+      />
+      <span className="text-muted mb-5">Human Resource Management System</span>
+      <Form method="post">
+        <div>
+          <h1 className="h3 mb-3 fw-normal text-center">Please sign in</h1>
+          <div className="form-floating">
+            <input
+              ref={emailRef}
+              id="email"
+              required
+              autoFocus={true}
+              name="email"
+              type="email"
+              autoComplete="email"
+              aria-invalid={actionData?.errors?.email ? true : undefined}
+              aria-describedby="email-error"
+              className="form-control"
+              placeholder="name@example.com"
+            />
+            <label htmlFor="email">Email address</label>
+          </div>
+          <div className="form-floating">
+            <input
+              id="password"
+              ref={passwordRef}
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              aria-invalid={actionData?.errors?.password ? true : undefined}
+              aria-describedby="password-error"
+              className="form-control"
+            />
+            <label htmlFor="password">Password</label>
+          </div>
+          {actionData?.errors?.password ? (
+            <div className="pt-1 text-red-700" id="password-error">
+              {actionData.errors.password}
+            </div>
+          ) : null}
+        </div>
+
+        <input type="hidden" name="redirectTo" value={redirectTo} />
+        <div className="d-flex items-center justify-content-between py-3">
+          <div className="d-flex items-center" style={{ gap: 5 }}>
+            <input
+              id="remember"
+              name="remember"
+              type="checkbox"
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
             <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+              htmlFor="remember"
+              className="ml-2 block text-sm text-gray-900"
             >
-              Email address
+              Remember me
             </label>
-            <div className="mt-1">
-              <input
-                ref={emailRef}
-                id="email"
-                required
-                autoFocus={true}
-                name="email"
-                type="email"
-                autoComplete="email"
-                aria-invalid={actionData?.errors?.email ? true : undefined}
-                aria-describedby="email-error"
-                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
-              />
-
-              {actionData?.errors?.email ? (
-                <div className="pt-1 text-red-700" id="email-error">
-                  {actionData.errors.email}
-                </div>
-              ) : null}
-            </div>
           </div>
-
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+          <div className="text-end text-sm text-gray-500">
+            <Link
+              className="text-blue-500 underline"
+              to={{
+                pathname: "/join",
+                search: searchParams.toString(),
+              }}
             >
-              Password
-            </label>
-            <div className="mt-1">
-              <input
-                id="password"
-                ref={passwordRef}
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                aria-invalid={actionData?.errors?.password ? true : undefined}
-                aria-describedby="password-error"
-                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
-              />
-
-              {actionData?.errors?.password ? (
-                <div className="pt-1 text-red-700" id="password-error">
-                  {actionData.errors.password}
-                </div>
-              ) : null}
-            </div>
+              Forgot Password?
+            </Link>
           </div>
-
-          <input type="hidden" name="redirectTo" value={redirectTo} />
-          <button
-            type="submit"
-            className="w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:bg-blue-400"
-          >
-            Log in
-          </button>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember"
-                name="remember"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-
-              <label
-                htmlFor="remember"
-                className="ml-2 block text-sm text-gray-900"
-              >
-                Remember me
-              </label>
-            </div>
-            <div className="text-center text-sm text-gray-500">
-              Don't have an account?{" "}
-              <Link
-                className="text-blue-500 underline"
-                to={{
-                  pathname: "/join",
-                  search: searchParams.toString(),
-                }}
-              >
-                Sign up
-              </Link>
-            </div>
-          </div>
-        </Form>
-      </div>
+        </div>
+        <button type="submit" className="w-100 btn btn-lg btn-primary">
+          Log in
+        </button>
+      </Form>
     </div>
   );
 }
